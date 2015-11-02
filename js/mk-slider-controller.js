@@ -8,7 +8,6 @@ mk_controller.init = function(settings){
 	//settinng slider settings for this instance
 	this.settings =  settings;
 	this.responsiveParams = {};
-	this.currentVideoSlide = -1;
 	this.autoplayInterval = 'off';
 	this.slider  = jQuery('#mk-container-'+this.settings.sliderId);
 	this.currentSlide = parseInt(this.settings.startingSlide);
@@ -50,6 +49,9 @@ mk_controller.init = function(settings){
 	if(this.settings.showNavigationButtonsOnHover == true){
 		this.enableNavigationHoverEvent();
 	}
+
+	//adding before videos play button
+	this.addPlayButtons();
 
 
 	switch(this.settings.disableResponsive){
@@ -219,15 +221,9 @@ mk_controller.calculateSlidePositions = function(){
  			}
  		}
  	}
-
- 	//if there is no video element in slide then hide play button
-
- 	//mmm!/
- 	if(this.slider.find('.mk-slide').eq(this.currentSlide-1).find('video').length != 0){
- 		playBtn.removeClass('mk-disabled');
- 	}else{
- 		playBtn.addClass('mk-disabled');
- 	}
+ 	//pause all playing videos
+ 	this.pauseStreams();
+ 
  }
 
  /*
@@ -318,9 +314,7 @@ mk_controller.bindNavigationEvents = function(){
 	rightBtn.on('click',function(event){
 		cstThis.goToNextSlide();
 	});
-	playBtn.on('click',function(){
-		cstThis.playVideoIfExists();
-	});
+
 	//stop propogation so that navigation buttons don't trigger drag effect
 	leftBtn.on('mousedown mouseup mouseleave',function(event){
 		event.stopPropagation();
@@ -328,9 +322,7 @@ mk_controller.bindNavigationEvents = function(){
 	rightBtn.on('mousedown mouseup mouseleave',function(event){
 		event.stopPropagation();
 	});
-	playBtn.on('mousedown mouseup mouseleave',function(event){
-		event.stopPropagation();
-	});
+
 }
 
 /*
@@ -488,7 +480,7 @@ mk_controller.dragSlider = function(dragObject){
 		if(this.dragObject.startX !== '' && this.dragObject.endX !== ''){
 			deltaX = this.dragObject.endX - this.dragObject.startX;
 		}
-		var percent = 0;
+		var percent = 0.03;
 		//if drag is more then 'percent' of the slide then check
 		//if deltaX is negative go to next slide
 		//else go to previous slide
@@ -646,47 +638,64 @@ mk_controller.updateVideoSizes = function(){
 	});
 }
 /*
- * If current slide has any videos then plays it
- * play button appears because of mouseenter and mouseleave events mmm!//
- */
-mk_controller.playVideoIfExists = function(){
-	var videoElement = this.slider.find('.mk-slide').eq(mk_controller.currentSlide - 1).find('video'),
-		videoTag,
-		playBtn  = this.slider.find('#mk-nav-play'),
-		videoTimeout = this.videoBtnTimeOut;
-		this.currentVideoSlide = this.currentSlide;
-	if(typeof videoElement != 'undefined'){
-		videoTag = videoElement.get(0);
-		if(!videoTag.paused){
-			videoTag.pause();
-			playBtn.addClass('fa-play');
-			playBtn.removeClass('fa-pause');
-			
-		}else{
-			videoTag.play();
-			playBtn.removeClass('fa-play');
-			playBtn.addClass('fa-pause');
-			playBtn.addClass('mk-disabled');
-			this.slider.on('mousemove',function(e){
-				playBtn.removeClass('mk-disabled');
-				clearTimeout(videoTimeout);
-				videoTimeout = setTimeout(function(){
-					playBtn.addClass('mk-disabled');
-				},1000);
-				
-			});
-			this.slider.on('mouseleave',function(e){
-				playBtn.addClass('mk-disabled');
-				e.stopPropagation();
-			});
-			this.slider.on('mouseenter',function(e){
-				playBtn.removeClass('mk-disabled');
-				e.stopPropagation();
-			});
+ * Adds play buttons before each video element is slides
+ */ 
+mk_controller.addPlayButtons = function(){
+	var cstThis = this;
+	this.slider.find('.mk-slide').each(function(){
+		var video = jQuery(this).find('video');
+		if(video.length !== 0){
+			video.before(jQuery('<span class="fa fa-play mk-play-btn"></span>'));
 		}
+	});
+	jQuery('.mk-play-btn').on('click',function(){
+		cstThis.videoController(jQuery(this));
+	});
+}
+/*
+ * handles video play/pause operations
+ */
+mk_controller.videoController = function(button){
+	//get stream
+	var stream = button.next().get(0);
+	if(stream.paused){
+		stream.play();
+		//hide pause button after one second
+		clearInterval(this.videoHoverTimeout);
+		this.videoHoverTimeout = setTimeout(function(){
+			button.removeClass('fa-pause');
+		},1000);
+	}else{
+		stream.pause();
 	}
-	videoTag.onended = function(e){
-		playBtn.addClass('fa-play');
-		playBtn.removeClass('fa-pause');
-	};
-};
+	//on mousemove check stream status and display pause/play button
+	button.next().on('mousemove',function(){
+		if(stream.paused){
+			button.removeClass('fa-pause').addClass('fa-play');
+		}else{
+			button.removeClass('fa-play').addClass('fa-pause');
+		}
+		clearInterval(this.videoHoverTimeout);
+		this.videoHoverTimeout = setTimeout(function(){
+			button.removeClass('fa-pause');
+		},1000);
+	});
+	stream.onended = function(){
+		button.removeClass('fa-pause').addClass('fa-play');
+	}
+	stream.onpause = function(){
+		button.removeClass('fa-pause').addClass('fa-play');
+	}
+	stream.onplay = function(){
+		button.removeClass('fa-play').addClass('fa-pause');
+	}
+}
+
+/*
+ * Pauses all playing videos in slider
+ */
+mk_controller.pauseStreams = function(){
+	this.slider.find('video').each(function(){
+		jQuery(this).get(0).pause();
+	});
+}
