@@ -1,0 +1,144 @@
+
+.mk-container{
+	width: 100%;
+	margin: 0;
+	background-color: #ccc
+
+}
+.mk-container-inner{
+	width: 900px;/*goes from backend*/
+	height: 600px;/*goes from backend*/
+	margin: 0 auto;
+	background-color: rgba(0,0,0,0.5);
+	position: relative;
+	overflow: hidden;
+	z-index: 1;
+}
+
+.mk-slide-wrapper{
+	position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    -ms-transition-property: -ms-transform;
+    transition-property: transform;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+}
+
+.mk-slide{
+	text-align: center;
+    font-size: 18px;
+    background: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    flex-shrink: 0;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+}
+.mk-slide div{
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.mk-pagination{
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	bottom: 10px;
+	z-index: 2;
+}
+.mk-pagination-item{
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    border-radius: 100%;
+    background: #000;
+    opacity: .4;
+}
+.mk-pagination-item:hover{
+	cursor: pointer;
+}
+.mk-pagination-active{
+	opacity: 1;
+	background-color: #154B5D;
+}
+.mk-navigation-buttons{
+	width: 100%;
+	position: absolute;
+	margin: auto;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 3;
+	/*font-size and height should be
+	  the same for proper navigation button centering*/
+	height: 40px;
+	font-size: 40px;
+	font-weight: 10;
+	text-align: center;
+	color: #BBB5B5;
+}
+#mk-nav-left{
+	float: left;
+}
+#mk-nav-right{
+	float: right
+}
+.mk-navigation-buttons span:hover{
+	color: #154B5D;
+	cursor: pointer;
+}
+.mk-slide-image{
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+}
+.mk-slide-video{
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+}
+/* Helper Classes*/
+.mk-noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.mk-clearfix:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
+.mk-cursor-move{
+	cursor: move;
+}
+.mk-disabled{
+	display: none;
+}
